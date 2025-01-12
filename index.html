@@ -282,6 +282,17 @@
     <script>
         let configs = [];
 
+        // Function to decode Base64
+        function decodeBase64(str) {
+            try {
+                return decodeURIComponent(atob(str).split('').map(c => {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+            } catch (e) {
+                return null;
+            }
+        }
+
         // Function to parse multiple vless:// or vmess:// links
         function parseConfigs() {
             const configInput = document.getElementById('configInput').value.trim();
@@ -290,30 +301,57 @@
 
             configLines.forEach((line, index) => {
                 try {
-                    const url = new URL(line);
-                    if (url.protocol !== 'vless:' && url.protocol !== 'vmess:') {
-                        throw new Error('Invalid link!');
+                    if (line.startsWith('vmess://')) {
+                        // Handle vmess:// links (Base64 encoded)
+                        const decodedConfig = decodeBase64(line.replace('vmess://', ''));
+                        if (!decodedConfig) {
+                            throw new Error('Invalid vmess link!');
+                        }
+                        const config = JSON.parse(decodedConfig);
+                        configs.push({
+                            id: index + 1,
+                            protocol: 'vmess',
+                            uuid: config.id,
+                            address: config.add,
+                            port: config.port,
+                            params: {
+                                type: config.net,
+                                path: config.path,
+                                security: config.tls === 'tls' ? 'tls' : 'none',
+                                encryption: 'auto',
+                                alpn: config.alpn,
+                                host: config.host,
+                                sni: config.sni,
+                                fp: config.fp
+                            },
+                            name: config.ps || 'Unnamed'
+                        });
+                    } else if (line.startsWith('vless://')) {
+                        // Handle vless:// links
+                        const url = new URL(line);
+                        configs.push({
+                            id: index + 1,
+                            protocol: 'vless',
+                            uuid: url.username,
+                            address: url.hostname,
+                            port: url.port,
+                            params: {
+                                type: url.searchParams.get('type') || '',
+                                path: url.searchParams.get('path') || '',
+                                security: url.searchParams.get('security') || 'none',
+                                encryption: url.searchParams.get('encryption') || 'none',
+                                alpn: url.searchParams.get('alpn') || '',
+                                host: url.searchParams.get('host') || '',
+                                sni: url.searchParams.get('sni') || '',
+                                fp: url.searchParams.get('fp') || ''
+                            },
+                            name: decodeURIComponent(url.hash.slice(1)) || 'Unnamed'
+                        });
+                    } else {
+                        throw new Error('Invalid link format!');
                     }
-
-                    // Extract config details
-                    const config = {
-                        id: index + 1,
-                        protocol: url.protocol.replace(':', ''),
-                        uuid: url.username,
-                        address: url.hostname,
-                        port: url.port,
-                        params: {},
-                        name: decodeURIComponent(url.hash.slice(1)) // Extract config name
-                    };
-
-                    // Extract query parameters
-                    url.searchParams.forEach((value, key) => {
-                        config.params[key] = value;
-                    });
-
-                    configs.push(config);
                 } catch (e) {
-                    alert(`Error parsing link ${index + 1}: Invalid link!`);
+                    alert(`Error parsing link ${index + 1}: ${e.message}`);
                 }
             });
 
