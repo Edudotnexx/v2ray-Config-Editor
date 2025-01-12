@@ -39,7 +39,13 @@ function parseConfigs() {
                 if (!decodedConfig) {
                     throw new Error('Invalid vmess link!');
                 }
+
+                // Parse JSON and validate required fields
                 const config = JSON.parse(decodedConfig);
+                if (!config.id || !config.add || !config.port) {
+                    throw new Error('Invalid vmess config: Missing required fields!');
+                }
+
                 configs.push({
                     id: index + 1,
                     protocol: 'vmess',
@@ -47,14 +53,14 @@ function parseConfigs() {
                     address: config.add,
                     port: config.port,
                     params: {
-                        type: config.net,
-                        path: config.path,
+                        type: config.net || '',
+                        path: config.path || '',
                         security: config.tls === 'tls' ? 'tls' : 'none',
                         encryption: 'auto',
-                        alpn: config.alpn,
-                        host: config.host,
-                        sni: config.sni,
-                        fp: config.fp
+                        alpn: config.alpn || '',
+                        host: config.host || '',
+                        sni: config.sni || '',
+                        fp: config.fp || ''
                     },
                     name: config.ps || 'Unnamed',
                     createdAt: new Date().toLocaleString(),
