@@ -19,6 +19,12 @@
             color: #333;
             padding: 20px;
             min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: #333;
+            color: #fff;
         }
 
         .container {
@@ -29,6 +35,12 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             padding: 20px;
             animation: fadeIn 0.5s ease-in-out;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .container {
+            background: #444;
+            color: #fff;
         }
 
         @keyframes fadeIn {
@@ -62,12 +74,36 @@
             margin-bottom: 20px;
             resize: vertical;
             background-color: #f9f9f9;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode textarea {
+            background: #555;
+            color: #fff;
+            border-color: #777;
         }
 
         textarea:focus {
             border-color: #007BFF;
             outline: none;
+        }
+
+        #dropZone {
+            border: 2px dashed #007BFF;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        #dropZone:hover {
+            background: #e9f5ff;
+        }
+
+        body.dark-mode #dropZone {
+            border-color: #00BFFF;
         }
 
         .config-list {
@@ -82,6 +118,12 @@
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             animation: slideIn 0.5s ease-in-out;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        body.dark-mode .config-item {
+            background: #555;
+            border-color: #777;
         }
 
         @keyframes slideIn {
@@ -168,13 +210,23 @@
             color: #555;
         }
 
+        body.dark-mode .config-details label {
+            color: #ccc;
+        }
+
         .config-details input {
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
             background-color: #f9f9f9;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .config-details input {
+            background: #666;
+            color: #fff;
+            border-color: #777;
         }
 
         .config-details input:focus {
@@ -224,6 +276,12 @@
             animation: fadeIn 0.3s ease-in-out;
         }
 
+        body.dark-mode .alert {
+            background: linear-gradient(135deg, #333, #444);
+            border-color: #00BFFF;
+            color: #00BFFF;
+        }
+
         .alert.show {
             display: block;
         }
@@ -271,8 +329,15 @@
 <body>
     <div class="container">
         <h1>Manage Multiple V2Ray Configs</h1>
+        <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <div id="dropZone">Drag & Drop your config file here</div>
+        <input type="file" id="fileInput" style="display: none;">
         <textarea id="configInput" placeholder="Enter your vless:// or vmess:// links here (one per line)..."></textarea>
-        <button onclick="parseConfigs()">Parse Configs</button>
+        <div class="buttons">
+            <button onclick="parseConfigs()">Parse Configs</button>
+            <button onclick="saveSettings()">Save Settings</button>
+            <button onclick="loadSettings()">Load Settings</button>
+        </div>
         <div class="config-list" id="configList">
             <!-- Config list will be displayed here -->
         </div>
@@ -293,6 +358,11 @@
             }
         }
 
+        // Function to validate config links
+        function isValidConfigLink(link) {
+            return link.startsWith('vless://') || link.startsWith('vmess://');
+        }
+
         // Function to parse multiple vless:// or vmess:// links
         function parseConfigs() {
             const configInput = document.getElementById('configInput').value.trim();
@@ -301,6 +371,10 @@
 
             configLines.forEach((line, index) => {
                 try {
+                    if (!isValidConfigLink(line)) {
+                        throw new Error('Invalid link format!');
+                    }
+
                     if (line.startsWith('vmess://')) {
                         // Handle vmess:// links (Base64 encoded)
                         const decodedConfig = decodeBase64(line.replace('vmess://', ''));
@@ -347,8 +421,6 @@
                             },
                             name: decodeURIComponent(url.hash.slice(1)) || 'Unnamed'
                         });
-                    } else {
-                        throw new Error('Invalid link format!');
                     }
                 } catch (e) {
                     alert(`Error parsing link ${index + 1}: ${e.message}`);
@@ -488,11 +560,80 @@
             alert.textContent = `New Link:\n${url.toString()}`;
             alert.classList.add('show');
 
+            // Copy to clipboard
+            copyToClipboard(url.toString());
+
             // Hide the alert after 5 seconds
             setTimeout(() => {
                 alert.classList.remove('show');
             }, 5000);
         }
+
+        // Function to copy text to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Link copied to clipboard!');
+            }).catch(() => {
+                console.log('Failed to copy link.');
+            });
+        }
+
+        // Function to save settings to localStorage
+        function saveSettings() {
+            const configs = document.getElementById('configInput').value;
+            localStorage.setItem('v2rayConfigs', configs);
+            alert('Settings saved!');
+        }
+
+        // Function to load settings from localStorage
+        function loadSettings() {
+            const configs = localStorage.getItem('v2rayConfigs');
+            if (configs) {
+                document.getElementById('configInput').value = configs;
+                alert('Settings loaded!');
+            } else {
+                alert('No settings found.');
+            }
+        }
+
+        // Function to toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        // Drag & Drop functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('configInput').value = event.target.result;
+            };
+            reader.readAsText(file);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#e9f5ff';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.backgroundColor = '#fff';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.backgroundColor = '#fff';
+            const file = e.dataTransfer.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('configInput').value = event.target.result;
+            };
+            reader.readAsText(file);
+        });
     </script>
 </body>
 </html>
