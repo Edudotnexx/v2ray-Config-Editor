@@ -12,11 +12,31 @@
     <div class="container">
         <h1>Manage Multiple V2Ray Configs</h1>
         <button class="btn btn-dark-mode" id="toggleDarkModeBtn">Toggle Dark Mode</button>
+        
+        <!-- Global Settings -->
+        <div class="global-settings">
+            <h2>Global Settings</h2>
+            <p>
+                <label for="globalSni">SNI:</label>
+                <input type="text" id="globalSni" placeholder="Enter global SNI">
+            </p>
+            <p>
+                <label for="globalHost">Host:</label>
+                <input type="text" id="globalHost" placeholder="Enter global Host">
+            </p>
+            <button class="btn btn-primary" onclick="applyGlobalSettings()">Apply to All Configs</button>
+        </div>
+
+        <!-- Drag & Drop Zone -->
         <div id="dropZone" class="drop-zone">
             <span>Drag & Drop your config file here</span>
         </div>
         <input type="file" id="fileInput" class="file-input">
+
+        <!-- Config Input -->
         <textarea id="configInput" class="config-input" placeholder="Enter your vless:// or vmess:// links here (one per line)..."></textarea>
+
+        <!-- Buttons -->
         <div class="buttons">
             <button class="btn btn-primary" id="parseConfigsBtn">Parse Configs</button>
             <button class="btn btn-secondary" id="saveSettingsBtn">Save Settings</button>
@@ -24,6 +44,8 @@
             <button class="btn btn-primary" id="exportConfigsBtn">Export Configs (JSON)</button>
             <button class="btn btn-primary" id="importConfigsBtn">Import Configs (JSON)</button>
         </div>
+
+        <!-- Search and Sort -->
         <input type="text" id="searchInput" class="search-input" placeholder="Search configs...">
         <select id="sortSelect" class="sort-select">
             <option value="name">Sort by Name</option>
@@ -31,10 +53,16 @@
             <option value="address">Sort by Address</option>
             <option value="port">Sort by Port</option>
         </select>
+
+        <!-- Config List -->
         <div class="config-list" id="configList">
             <!-- Config list will be displayed here -->
         </div>
+
+        <!-- Alert -->
         <div class="alert" id="alert">New link generated successfully!</div>
+
+        <!-- QR Code -->
         <div id="qrcode" class="qrcode-container"></div>
     </div>
     <script src="script.js"></script>
