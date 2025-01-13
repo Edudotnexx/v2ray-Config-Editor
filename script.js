@@ -266,6 +266,11 @@ function toggleConfig(index, event) {
     if (event && event.target.closest('button')) return; // Prevent toggling if clicking on a button
     const configContent = document.querySelectorAll('.config-content')[index];
     configContent.classList.toggle('open');
+
+    // Hide QR Code when config content is closed
+    if (!configContent.classList.contains('open')) {
+        document.getElementById('qrcode').innerHTML = '';
+    }
 }
 
 // Function to filter configs
@@ -275,7 +280,8 @@ function filterConfigs() {
         config.name.toLowerCase().includes(searchTerm) ||
         config.address.toLowerCase().includes(searchTerm) ||
         config.protocol.toLowerCase().includes(searchTerm) ||
-        config.uuid.toLowerCase().includes(searchTerm)
+        config.uuid.toLowerCase().includes(searchTerm) ||
+        config.port.toString().includes(searchTerm)
     );
     displayConfigList(filteredConfigs);
 }
@@ -339,6 +345,31 @@ function showQRCode(url) {
 // Function to toggle dark mode
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
+    // Save dark mode preference to localStorage
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+}
+
+// Load dark mode preference on page load
+function loadDarkMode() {
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+// Function to apply global settings (SNI and Host)
+function applyGlobalSettings() {
+    const globalSni = document.getElementById('globalSni').value;
+    const globalHost = document.getElementById('globalHost').value;
+
+    configs.forEach(config => {
+        if (globalSni && !config.params.sni) config.params.sni = globalSni;
+        if (globalHost && !config.params.host) config.params.host = globalHost;
+    });
+
+    displayConfigList(configs);
+    alert('Global settings applied to all configs!');
 }
 
 // Drag & Drop functionality
@@ -395,3 +426,6 @@ document.getElementById('importConfigsBtn').addEventListener('click', importConf
 document.getElementById('toggleDarkModeBtn').addEventListener('click', toggleDarkMode);
 document.getElementById('searchInput').addEventListener('input', filterConfigs);
 document.getElementById('sortSelect').addEventListener('change', sortConfigs);
+
+// Load dark mode preference on page load
+window.addEventListener('load', loadDarkMode);
