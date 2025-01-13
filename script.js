@@ -122,7 +122,7 @@ function displayConfigList(configs) {
         configHeader.className = 'config-header';
         configHeader.innerHTML = `
             <h3>Config #${config.id}: ${config.name || 'Unnamed'}</h3>
-            <button onclick="deleteConfig(${index}, event)">🗑️</button>
+            <button onclick="deleteConfig(${index}, event)">Delete</button>
         `;
         configHeader.addEventListener('click', (event) => toggleConfig(index, event));
 
@@ -253,17 +253,17 @@ function copyToClipboard(text) {
 
 // Function to delete a config
 function deleteConfig(index, event) {
-    event.stopPropagation(); // جلوگیری از انتشار رویداد
-    configs.splice(index, 1); // حذف کانفیگ از آرایه
-    displayConfigList(configs); // به‌روزرسانی لیست کانفیگ‌ها
-    document.getElementById('qrcode').innerHTML = ''; // پاک کردن QR Code
+    event.stopPropagation(); // Prevent event bubbling
+    configs.splice(index, 1); // Remove config from the array
+    displayConfigList(configs); // Refresh the config list
+    document.getElementById('qrcode').innerHTML = ''; // Clear QR Code
     // Auto-backup to localStorage
     localStorage.setItem('v2rayConfigsBackup', JSON.stringify(configs));
 }
 
 // Function to toggle config content
 function toggleConfig(index, event) {
-    if (event && event.target.tagName === 'BUTTON') return; // جلوگیری از باز شدن اگر روی دکمه کلیک شده باشد
+    if (event && event.target.closest('button')) return; // Prevent toggling if clicking on a button
     const configContent = document.querySelectorAll('.config-content')[index];
     configContent.classList.toggle('open');
 }
@@ -273,7 +273,9 @@ function filterConfigs() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filteredConfigs = configs.filter(config =>
         config.name.toLowerCase().includes(searchTerm) ||
-        config.address.toLowerCase().includes(searchTerm)
+        config.address.toLowerCase().includes(searchTerm) ||
+        config.protocol.toLowerCase().includes(searchTerm) ||
+        config.uuid.toLowerCase().includes(searchTerm)
     );
     displayConfigList(filteredConfigs);
 }
@@ -281,7 +283,11 @@ function filterConfigs() {
 // Function to sort configs
 function sortConfigs() {
     const sortBy = document.getElementById('sortSelect').value;
-    configs.sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
+    if (sortBy === 'port') {
+        configs.sort((a, b) => a[sortBy] - b[sortBy]);
+    } else {
+        configs.sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
+    }
     displayConfigList(configs);
 }
 
@@ -318,6 +324,10 @@ function importConfigs() {
 
 // Function to show QR Code
 function showQRCode(url) {
+    if (typeof QRCode === 'undefined') {
+        alert('QRCode library is not loaded!');
+        return;
+    }
     document.getElementById('qrcode').innerHTML = '';
     new QRCode(document.getElementById('qrcode'), {
         text: url,
@@ -367,7 +377,7 @@ dropZone.addEventListener('drop', (e) => {
 
 // Load settings from localStorage on page load
 function loadSettings() {
-    const configs = localStorage.getItem('v2rayConfigs');
+    const configs = localStorage.getItem('v2rayConfigsBackup');
     if (configs) {
         document.getElementById('configInput').value = configs;
         alert('Settings loaded!');
@@ -375,3 +385,13 @@ function loadSettings() {
         alert('No settings found.');
     }
 }
+
+// Event listeners
+document.getElementById('parseConfigsBtn').addEventListener('click', parseConfigs);
+document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+document.getElementById('loadSettingsBtn').addEventListener('click', loadSettings);
+document.getElementById('exportConfigsBtn').addEventListener('click', exportConfigs);
+document.getElementById('importConfigsBtn').addEventListener('click', importConfigs);
+document.getElementById('toggleDarkModeBtn').addEventListener('click', toggleDarkMode);
+document.getElementById('searchInput').addEventListener('input', filterConfigs);
+document.getElementById('sortSelect').addEventListener('change', sortConfigs);
