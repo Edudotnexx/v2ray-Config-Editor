@@ -37,13 +37,19 @@ function parseConfigs() {
                 // Handle vmess:// links (Base64 encoded)
                 const decodedConfig = decodeBase64(line.replace('vmess://', ''));
                 if (!decodedConfig) {
-                    throw new Error('Invalid vmess link!');
+                    throw new Error('Failed to decode vmess link!');
                 }
 
                 // Parse JSON and validate required fields
-                const config = JSON.parse(decodedConfig);
+                let config;
+                try {
+                    config = JSON.parse(decodedConfig);
+                } catch (e) {
+                    throw new Error('Invalid JSON in vmess link!');
+                }
+
                 if (!config.id || !config.add || !config.port) {
-                    throw new Error('Invalid vmess config: Missing required fields!');
+                    throw new Error('Invalid vmess config: Missing required fields (id, add, port)!');
                 }
 
                 configs.push({
@@ -92,6 +98,7 @@ function parseConfigs() {
             }
         } catch (e) {
             alert(`Error parsing link ${index + 1}: ${e.message}`);
+            console.error(`Error parsing link ${index + 1}:`, e);
         }
     });
 
