@@ -11,24 +11,25 @@
 <body>
     <div class="container">
         <h1>Manage Multiple V2Ray Configs</h1>
-        <button class="btn btn-dark-mode" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <button class="btn btn-dark-mode" id="toggleDarkModeBtn">Toggle Dark Mode</button>
         <div id="dropZone" class="drop-zone">
             <span>Drag & Drop your config file here</span>
         </div>
         <input type="file" id="fileInput" class="file-input">
         <textarea id="configInput" class="config-input" placeholder="Enter your vless:// or vmess:// links here (one per line)..."></textarea>
         <div class="buttons">
-            <button class="btn btn-primary" onclick="parseConfigs()">Parse Configs</button>
-            <button class="btn btn-secondary" onclick="saveSettings()">Save Settings</button>
-            <button class="btn btn-secondary" onclick="loadSettings()">Load Settings</button>
-            <button class="btn btn-primary" onclick="exportConfigs()">Export Configs (JSON)</button>
-            <button class="btn btn-primary" onclick="importConfigs()">Import Configs (JSON)</button>
+            <button class="btn btn-primary" id="parseConfigsBtn">Parse Configs</button>
+            <button class="btn btn-secondary" id="saveSettingsBtn">Save Settings</button>
+            <button class="btn btn-secondary" id="loadSettingsBtn">Load Settings</button>
+            <button class="btn btn-primary" id="exportConfigsBtn">Export Configs (JSON)</button>
+            <button class="btn btn-primary" id="importConfigsBtn">Import Configs (JSON)</button>
         </div>
-        <input type="text" id="searchInput" class="search-input" placeholder="Search configs..." oninput="filterConfigs()">
-        <select id="sortSelect" class="sort-select" onchange="sortConfigs()">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search configs...">
+        <select id="sortSelect" class="sort-select">
             <option value="name">Sort by Name</option>
             <option value="protocol">Sort by Protocol</option>
             <option value="address">Sort by Address</option>
+            <option value="port">Sort by Port</option>
         </select>
         <div class="config-list" id="configList">
             <!-- Config list will be displayed here -->
