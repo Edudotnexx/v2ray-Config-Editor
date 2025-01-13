@@ -303,6 +303,45 @@ body.dark-mode .alert {
     text-align: center;
 }
 
+/* Global Settings */
+.global-settings {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.global-settings h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.global-settings p {
+    margin-bottom: 10px;
+}
+
+.global-settings label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.global-settings input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+}
+
+.global-settings input:focus {
+    border-color: #007BFF;
+    outline: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .config-details {
